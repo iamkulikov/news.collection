@@ -10,5 +10,8 @@ Imports:
     jsonlite,
     officer,
     shiny
+Suggests:
+    htmltools,
+    rsconnect
 URL: https://github.com/iamkulikov/news.collection
 BugReports: https://github.com/iamkulikov/news.collection/issues
