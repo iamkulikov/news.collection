@@ -1,9 +1,10 @@
 # UI: layout, bslib theme, baseline inputs/outputs
 
-limits <- news_count_limits()
-dr <- default_date_range()
-
 app_ui <- function(request) {
+  
+  limits <- news_count_limits()
+  dr <- default_date_range()
+  
   page_sidebar(
     title = tr("RUS", "app_title"),
     theme = bs_theme(

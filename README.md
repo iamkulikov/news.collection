@@ -31,7 +31,7 @@ The app helps build a structured news brief for sovereign risk analysis: - choos
 -   **Country mapping**: `countrycode`
 -   **DOCX export**: `officer`
 
-Package dependencies are listed in `DESCRIPTION`.
+Package dependencies are listed in `DESCRIPTION`; exact versions are pinned in `renv.lock` for reproducible installs.
 
 ## Project structure
 
@@ -48,10 +48,17 @@ Package dependencies are listed in `DESCRIPTION`.
 
 ## Quick start
 
-1.  Install R dependencies:
+1.  Install **R** (4.x) and restore the locked package library with [**renv**](https://rstudio.github.io/renv/). From the project root:
 
     ``` r
-    install.packages(c("shiny", "bslib", "countrycode", "digest", "httr2", "jsonlite", "officer", "yaml"))
+    source("renv/activate.R")
+    renv::restore(prompt = FALSE)
+    ```
+
+    If `renv` is not installed yet, run `install.packages("renv")` once, then the lines above. Package versions are pinned in [`renv.lock`](renv.lock); declared dependencies are also listed in [`DESCRIPTION`](DESCRIPTION). To verify a clean restore and that the app loads, run:
+
+    ``` powershell
+    Rscript scripts/verify_renv.R
     ```
 
 2.  Set your API key:
@@ -64,7 +71,7 @@ Package dependencies are listed in `DESCRIPTION`.
 
     -   or add `OPENAI_API_KEY=...` to `.Renviron`.
 
-3.  Run the app from project root:
+3.  Run the app from project root (loads `renv` via `.Rprofile`):
 
     ``` powershell
     Rscript -e "shiny::runApp('.')"
@@ -85,6 +92,10 @@ Common options:
 -   `NEWS_CACHE_TTL_SEC` — cache TTL in seconds.
 
 See `R/config.R` for defaults and validation.
+
+## Deploy to shinyapps.io
+
+Production-style deployment (secrets in the host dashboard, `rsconnect` publish steps, and a post-deploy smoke checklist) is documented in [`deploy/SHINYAPPS.md`](deploy/SHINYAPPS.md). The project includes a [`.rsconnectignore`](.rsconnectignore) file so tests and local-only paths are not uploaded with the app bundle.
 
 ## Tests
 
