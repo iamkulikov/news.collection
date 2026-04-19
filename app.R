@@ -1,5 +1,4 @@
-# Sovereign risk news — Shiny entry point
-# Dependencies: shiny, bslib
+# Country Risk News Finder
 
 library(shiny)
 library(bslib)
