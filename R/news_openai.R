@@ -54,14 +54,16 @@ fetch_sovereign_news_response <- function(country_iso3,
     search_language_phrase = search_language_phrase
   )
 
-  text_fmt <- openai_responses_news_text(n = n_news)
+  text_fmt <- openai_responses_news_text(n = n_news, strict = openai_json_schema_strict())
 
   extra_body <- list(max_output_tokens = openai_max_output_tokens())
   tools <- if (isTRUE(openai_web_search_enabled())) {
-    openai_responses_default_web_search_tools()
+    openai_responses_default_web_search_tools(type = openai_web_search_tool_type())
   } else {
     NULL
   }
+
+  tool_choice <- if (!is.null(tools)) "auto" else NULL
 
   res <- openai_responses_create(
     instructions = pr$system,
@@ -69,6 +71,7 @@ fetch_sovereign_news_response <- function(country_iso3,
     model = NULL,
     text = text_fmt,
     tools = tools,
+    tool_choice = tool_choice,
     parse_json = TRUE,
     json_repair_attempt = TRUE,
     validate_parsed_json = function(parsed) {

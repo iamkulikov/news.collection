@@ -5,7 +5,10 @@ Encoding: UTF-8
 Imports:
     bslib,
     countrycode,
+    digest,
+    httr2,
     jsonlite,
+    officer,
     shiny
 URL: https://github.com/iamkulikov/news.collection
 BugReports: https://github.com/iamkulikov/news.collection/issues

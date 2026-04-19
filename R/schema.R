@@ -165,10 +165,12 @@ validate_news_response <- function(parsed, n_expected = NULL) {
         }
         if (!.is_url_like(s$url)) push("%s.sources[%d].url must be an http(s) URL.", pref, k)
         if (!.is_nonempty_string(s$source_name)) push("%s.sources[%d].source_name must be a non-empty string.", pref, k)
-        if ("published_date" %in% names(s)) {
+        if (!("published_date" %in% names(s))) {
+          push("%s.sources[%d].published_date must be present (use empty string if unknown).", pref, k)
+        } else {
           pd <- s$published_date
           if (!(is.character(pd) && length(pd) == 1L && !is.na(pd))) {
-            push("%s.sources[%d].published_date must be a string if present.", pref, k)
+            push("%s.sources[%d].published_date must be a string.", pref, k)
           }
         }
       }

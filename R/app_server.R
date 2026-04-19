@@ -152,8 +152,9 @@ app_server <- function(input, output, session) {
           "OpenAI request failed:\n",
           api$error,
           "\n\n",
-          "If you see 403, try setting OPENAI_WEB_SEARCH=false or use a model with tool access. ",
-          "If 429, wait and retry or reduce N / shorten the period."
+          "Hints: HTTP 400 — see param/code in the message; try OPENAI_MODEL, OPENAI_WEB_SEARCH=false, ",
+          "OPENAI_JSON_SCHEMA_STRICT=false, or OPENAI_WEB_SEARCH_TOOL_TYPE=web_search. ",
+          "HTTP 403 — tools or model not allowed. HTTP 429 — wait or reduce N / period."
         ))
         last_validated_response(NULL)
         setProgress(1, detail = "Stopped — API error")

@@ -139,3 +139,16 @@ openai_web_search_enabled <- function() {
   v <- tolower(trimws(Sys.getenv("OPENAI_WEB_SEARCH", "true")))
   !v %in% c("0", "false", "no", "off")
 }
+
+#' Tool type string for Responses API (`type` field on the tool object).
+#' If you get HTTP 400 on `tools`, try `web_search` or `web_search_2025_08_26` instead of `web_search_preview`.
+openai_web_search_tool_type <- function() {
+  t <- trimws(Sys.getenv("OPENAI_WEB_SEARCH_TOOL_TYPE", "web_search_preview"))
+  if (!nzchar(t)) "web_search_preview" else t
+}
+
+#' Strict JSON Schema for structured outputs; set `OPENAI_JSON_SCHEMA_STRICT=false` if the API rejects the schema.
+openai_json_schema_strict <- function() {
+  v <- tolower(trimws(Sys.getenv("OPENAI_JSON_SCHEMA_STRICT", "true")))
+  !v %in% c("0", "false", "no", "off")
+}

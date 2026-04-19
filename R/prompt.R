@@ -86,7 +86,7 @@ topic_category_values <- c(
     "1 соответствует самому верхнему элементу списка (самый высокий совокупный приоритет по трем шкалам), N — самому нижнему. ",
     "Ранги должны быть согласованы с сортировкой items (без пропусков и дубликатов). ",
     "Для каждой новости укажи origin: base_search или follow_up. ",
-    "Источники sources: обычно 2–6 записей; каждая запись содержит url и source_name (и published_date по возможности). ",
+    "Источники sources: 2–6 записей; в каждой обязательны url, source_name и published_date (ISO YYYY-MM-DD или пустая строка, если дата неизвестна). ",
     "Не выдумывай URL: используй реальные ссылки, которые ты нашел в ходе поиска с инструментами провайдера."
   )
 }
@@ -256,7 +256,8 @@ build_sovereign_news_prompt <- function(country_iso3,
         description = "ISO date (YYYY-MM-DD) if known; otherwise empty string"
       )
     ),
-    required = list("url", "source_name"),
+    # OpenAI strict JSON Schema: every key in `properties` must appear in `required`.
+    required = list("url", "source_name", "published_date"),
     additionalProperties = FALSE
   )
 }

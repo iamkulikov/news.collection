@@ -150,7 +150,23 @@ openai_responses_parse_json_text <- function(text) {
   jsonlite::fromJSON(text, simplifyVector = FALSE, simplifyDataFrame = FALSE)
 }
 
+.strip_ansi_escapes <- function(x) {
+  if (!length(x) || !is.character(x)) {
+    return(x)
+  }
+  gsub("\033\\[[0-9;]*m", "", x, perl = TRUE)
+}
+
 .openai_http_error_hint <- function(status) {
+  if (status == 400L) {
+    return(
+      paste0(
+        " Check `param`/`code` in the message. Try: another OPENAI_MODEL; ",
+        "OPENAI_WEB_SEARCH=false; OPENAI_JSON_SCHEMA_STRICT=false; ",
+        "OPENAI_WEB_SEARCH_TOOL_TYPE=web_search (or web_search_preview)."
+      )
+    )
+  }
   if (status == 401L) {
     return(" Check OPENAI_API_KEY and account access.")
   }
@@ -173,7 +189,13 @@ openai_responses_parse_json_text <- function(text) {
   }
   err <- body$error
   if (is.list(err) && length(err$message)) {
-    return(sprintf("OpenAI API error (HTTP %s): %s%s", status, err$message, hint))
+    msg <- .strip_ansi_escapes(as.character(err$message)[1L])
+    bits <- character()
+    if (length(err$type)) bits <- c(bits, sprintf("type=%s", err$type))
+    if (length(err$param)) bits <- c(bits, sprintf("param=%s", err$param))
+    if (length(err$code)) bits <- c(bits, sprintf("code=%s", err$code))
+    sfx <- if (length(bits)) paste0(" [", paste(bits, collapse = ", "), "]") else ""
+    return(sprintf("OpenAI API error (HTTP %s): %s%s%s", status, msg, sfx, hint))
   }
   sprintf("OpenAI API error (HTTP %s).%s", status, hint)
 }
@@ -182,7 +204,7 @@ openai_responses_parse_json_text <- function(text) {
   if (is.null(msg) || !nzchar(msg)) {
     return("Request failed (no details). Check your network and try again.")
   }
-  m <- as.character(msg)[1L]
+  m <- .strip_ansi_escapes(as.character(msg)[1L])
   hint <- ""
   if (grepl("timed out|Timeout|timeout|Timeout was reached", m, ignore.case = TRUE)) {
     hint <- paste0(
@@ -197,6 +219,11 @@ openai_responses_parse_json_text <- function(text) {
     hint <- " Check your internet connection, proxy/VPN, and firewall settings."
   } else if (grepl("SSL|certificate", m, ignore.case = TRUE)) {
     hint <- " There may be a TLS/proxy issue on this machine."
+  } else if (grepl("HTTP 400|400 Bad Request", m, ignore.case = TRUE)) {
+    hint <- paste0(
+      " Prefer updating the client so HTTP errors return a parsed JSON body. ",
+      "Workarounds: OPENAI_WEB_SEARCH=false, OPENAI_JSON_SCHEMA_STRICT=false, OPENAI_MODEL, OPENAI_WEB_SEARCH_TOOL_TYPE."
+    )
   }
   paste0("OpenAI request could not complete: ", m, hint)
 }
@@ -265,6 +292,8 @@ openai_responses_create <- function(instructions = NULL,
   req <- httr2::req_headers(req, Authorization = paste("Bearer", key))
   req <- httr2::req_body_json(req, body, auto_unbox = TRUE)
   req <- httr2::req_timeout(req, timeout_sec)
+  # Do not throw on 4xx/5xx — we need JSON `error` from the body (e.g. HTTP 400 reasons).
+  req <- httr2::req_error(req, is_error = function(resp) FALSE)
   req <- httr2::req_retry(
     req,
     max_tries = max_retries,
@@ -406,6 +435,7 @@ openai_responses_create <- function(instructions = NULL,
     req2 <- httr2::req_headers(req2, Authorization = paste("Bearer", key))
     req2 <- httr2::req_body_json(req2, repair_body, auto_unbox = TRUE)
     req2 <- httr2::req_timeout(req2, timeout_sec)
+    req2 <- httr2::req_error(req2, is_error = function(resp) FALSE)
     req2 <- httr2::req_retry(
       req2,
       max_tries = max_retries,
