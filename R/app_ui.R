@@ -26,7 +26,7 @@ app_ui <- function(request) {
       ),
       dateRangeInput(
         inputId = "date_range",
-        label = paste0("Period (Maximum span: ", max_period_months(), " months)"),
+        label = paste0("Period (maximum span: ", max_period_months(), " months)"),
         start = dr[["start"]],
         end = dr[["end"]],
         max = Sys.Date(),
